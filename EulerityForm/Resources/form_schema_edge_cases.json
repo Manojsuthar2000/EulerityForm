@@ -1,0 +1,100 @@
+{
+  "theme": {
+    "background_color": "#121212",
+    "text_color": "#E0E0E0",
+    "border_color": "#333333",
+    "error_color": "#CF6679"
+  },
+  "form_title": "Comprehensive Campaign Setup",
+  "fields": [
+    {
+      "id": "ad_networks",
+      "order": 4,
+      "type": "DROPDOWN",
+      "label": "Ad Networks",
+      "allow_multiple": true,
+      "error_message": "Please select at least one network.",
+      "required": true,
+      "options": [
+        { "id": "net_google", "label": "Google Search" },
+        { "id": "net_meta", "label": "Meta Platforms" },
+        { "id": "net_tiktok", "label": "TikTok" }
+      ]
+    },
+    {
+      "id": "accept_legal",
+      "order": 10,
+      "type": "CHECKBOX",
+      "label": "I have read and agree to the Terms of Service and Privacy Policy.",
+      "error_message": "You must accept the legal terms to launch.",
+      "required": true,
+      "metadata": {
+        "Terms of Service": "https://example.com/terms",
+        "Privacy Policy": "https://example.com/privacy"
+      },
+      "clickable_text_color": "#BB86FC"
+    },
+    {
+      "id": "campaign_name",
+      "order": 1,
+      "type": "TEXT",
+      "subtype": "PLAIN",
+      "label": "Campaign Name",
+      "default_value": "Summer Sale 2026 - Extended Promotional Edition",
+      "max_length": 20,
+      "error_message": "Name is required and cannot exceed 20 characters.",
+      "required": true
+    },
+    {
+      "id": "brand_color",
+      "order": 6,
+      "type": "COLOR_PICKER",
+      "label": "Primary Brand Color",
+      "required": true
+    },
+    {
+      "id": "daily_budget",
+      "order": 2,
+      "type": "TEXT",
+      "subtype": "NUMBER",
+      "label": "Daily Budget ($)",
+      "placeholder": "0.00",
+      "error_message": "Budget is required.",
+      "required": true
+    },
+    {
+      "id": "enable_ai_opt",
+      "order": 8,
+      "type": "TOGGLE",
+      "label": "Enable AI Bidding Optimization",
+      "default_value": true,
+      "required": false
+    },
+    {
+      "id": "billing_account",
+      "order": 5,
+      "type": "DROPDOWN",
+      "label": "Billing Account",
+      "required": true,
+      "options": []
+    },
+    {
+      "id": "admin_password",
+      "order": 9,
+      "type": "TEXT",
+      "subtype": "SECURE",
+      "label": "Admin Password",
+      "error_message": "Password validation required.",
+      "required": true
+    },
+    {
+      "id": "destination_url",
+      "order": 3,
+      "type": "TEXT",
+      "subtype": "URI",
+      "label": "Destination URL",
+      "placeholder": "https://",
+      "required": true
+    }
+  ]
+}

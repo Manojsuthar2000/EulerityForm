@@ -2,8 +2,6 @@
 //  EulerityFormApp.swift
 //  EulerityForm
 //
-//  Created by Manoj Suthar on 26/05/26.
-//
 
 import SwiftUI
 
@@ -11,7 +9,9 @@ import SwiftUI
 struct EulerityFormApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            // Swap the filename to test the edge-case payload:
+            DynamicFormView(viewModel: FormViewModel(bundleFile: "form_schema_edge_cases"))
+            // DynamicFormView(viewModel: FormViewModel(bundleFile: "form_schema"))
         }
     }
 }
