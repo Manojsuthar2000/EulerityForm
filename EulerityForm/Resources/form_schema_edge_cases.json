@@ -52,6 +52,15 @@
       "required": true
     },
     {
+      "id": "info",
+      "order": 3,
+      "type": "TEXT",
+      "subtype": "MULTILINE",
+      "label": "Information",
+      "default_value": "Testing",
+      "required": false
+    },
+    {
       "id": "brand_color",
       "order": 6,
       "type": "COLOR_PICKER",
