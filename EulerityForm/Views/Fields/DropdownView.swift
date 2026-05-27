@@ -2,13 +2,20 @@
 //  DropdownView.swift
 //  EulerityForm
 //
-//  DROPDOWN renderer. Single-select uses a Menu with options.
-//  Multi-select uses a Menu containing checkbox-style buttons that
-//  toggle each option without dismissing the menu.
+//  DROPDOWN renderer. Two modes:
 //
-//  Empty options array (a required edge case) renders a disabled
-//  control with a "No options available" placeholder. The field still
-//  fails validation, since it can never be satisfied.
+//  - Single-select: uses iOS Menu — taps an option, menu dismisses,
+//    selection commits immediately. The simple case where Menu works fine.
+//
+//  - Multi-select: custom UI. Closed state shows a chip area with each
+//    selected option as a removable chip (× clears that one immediately,
+//    no Apply needed). Open state shows a panel BELOW the field with
+//    checkbox rows; the panel uses its own draft state, with Cancel and
+//    Apply buttons. Apply commits to the view model. Cancel discards.
+//
+//  Empty-options edge case: rendered as a non-interactive placeholder.
+//  Validation still fails for required fields, so the user sees the
+//  problem on Save.
 //
 
 import SwiftUI
@@ -18,20 +25,28 @@ struct DropdownView: View {
     let theme: Theme
     @ObservedObject var viewModel: FormViewModel
 
-    private var errorMessage: String? { viewModel.error(for: config.id) }
+    @State private var isPanelOpen = false
+
+    // Shown error: suppress while the panel is open so we're not yelling
+    // at the user while they're actively fixing the field.
+    private var errorMessage: String? {
+        guard !isPanelOpen else { return nil }
+        return viewModel.error(for: config.id)
+    }
     private var borderColor: Color { errorMessage != nil ? theme.error : theme.border }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 2) {
-                Text(config.label).foregroundColor(theme.text)
-                if config.required {
-                    Text("*").foregroundColor(theme.error)
-                }
-            }
+            Text(RequiredLabel.build(
+                label: config.label,
+                required: config.required,
+                textColor: theme.text,
+                errorColor: theme.error
+            ))
             .font(.subheadline)
 
-            menuContent
+            // Closed-state header (always visible)
+            headerView
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -41,38 +56,56 @@ struct DropdownView: View {
                         .stroke(borderColor, lineWidth: 1)
                 )
 
+            // Multi-select panel — inline, pushes content below down
+            if isPanelOpen && config.allowMultiple && !config.options.isEmpty {
+                MultiSelectPanel(
+                    options: config.options,
+                    initialSelection: viewModel.values[config.id]?.asMultiSelect ?? [],
+                    theme: theme,
+                    onCancel: {
+                        withAnimation(.easeInOut(duration: 0.15)) { isPanelOpen = false }
+                    },
+                    onApply: { newSelection in
+                        viewModel.multiSelectBinding(for: config.id).wrappedValue = newSelection
+                        withAnimation(.easeInOut(duration: 0.15)) { isPanelOpen = false }
+                    }
+                )
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
             if let err = errorMessage {
-                Text(err)
-                    .font(.caption)
-                    .foregroundColor(theme.error)
+                Text(err).font(.caption).foregroundColor(theme.error)
             }
         }
     }
+
+    // MARK: - Header (closed state)
 
     @ViewBuilder
-    private var menuContent: some View {
+    private var headerView: some View {
         if config.options.isEmpty {
-            // Empty options edge case — render a non-interactive placeholder.
-            // Validation still fails for required fields, so user gets feedback
-            // on Save tap.
-            HStack {
-                Text("No options available")
-                    .foregroundColor(theme.text.opacity(0.5))
-                    .italic()
-                Spacer()
-                Image(systemName: "chevron.down")
-                    .foregroundColor(theme.text.opacity(0.3))
-            }
+            emptyOptionsHeader
         } else if config.allowMultiple {
-            multiSelectMenu
+            multiSelectHeader
         } else {
-            singleSelectMenu
+            singleSelectHeader
         }
     }
 
-    // MARK: - Single select
+    private var emptyOptionsHeader: some View {
+        HStack {
+            Text("No options available")
+                .foregroundColor(theme.text.opacity(0.5))
+                .italic()
+            Spacer()
+            Image(systemName: "chevron.down")
+                .foregroundColor(theme.text.opacity(0.3))
+        }
+    }
 
-    private var singleSelectMenu: some View {
+    // MARK: - Single select (Menu — simple, closes on tap)
+
+    private var singleSelectHeader: some View {
         Menu {
             ForEach(config.options) { option in
                 Button {
@@ -88,9 +121,7 @@ struct DropdownView: View {
         } label: {
             HStack {
                 Text(currentLabelForSingleSelect)
-                    .foregroundColor(currentLabelForSingleSelect == placeholderText
-                                     ? theme.text.opacity(0.5)
-                                     : theme.text)
+                    .foregroundColor(isSinglePlaceholder ? theme.text.opacity(0.5) : theme.text)
                 Spacer()
                 Image(systemName: "chevron.down")
                     .foregroundColor(theme.text.opacity(0.6))
@@ -98,62 +129,53 @@ struct DropdownView: View {
         }
     }
 
-    private var placeholderText: String { "Select…" }
+    private var isSinglePlaceholder: Bool {
+        viewModel.values[config.id]?.asSingleSelect == nil
+    }
 
     private var currentLabelForSingleSelect: String {
         if let id = viewModel.values[config.id]?.asSingleSelect,
            let option = config.options.first(where: { $0.id == id }) {
             return option.label
         }
-        return placeholderText
+        return "Select…"
     }
 
-    // MARK: - Multi select
+    // MARK: - Multi select header (chips + chevron, taps open the panel)
 
-    private var multiSelectMenu: some View {
-        Menu {
-            ForEach(config.options) { option in
-                // Toggle without dismissing — iOS keeps Menu open if we
-                // pass `.continuous` via a wrapper. Simpler approach:
-                // just provide a Button; user can re-tap the menu to keep
-                // multi-selecting. (Apple changed this behavior across
-                // iOS versions; this is the lowest-friction stable approach
-                // on iOS 16.)
-                Button {
-                    viewModel.toggleMultiSelect(fieldId: config.id, optionId: option.id)
-                } label: {
-                    let selected = viewModel.values[config.id]?.asMultiSelect.contains(option.id) ?? false
-                    if selected {
-                        Label(option.label, systemImage: "checkmark")
-                    } else {
-                        Text(option.label)
-                    }
-                }
+    private var multiSelectHeader: some View {
+        // The whole header is one tap target — taps anywhere except a chip's
+        // × button toggle the panel. Chip × is handled by SelectedChipsView
+        // via its own Button, which absorbs taps.
+        let selected = viewModel.values[config.id]?.asMultiSelect ?? []
+        return Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPanelOpen.toggle()
             }
         } label: {
-            HStack {
-                Text(currentLabelForMultiSelect)
-                    .foregroundColor(currentLabelForMultiSelect == placeholderText
-                                     ? theme.text.opacity(0.5)
-                                     : theme.text)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                Spacer()
-                Image(systemName: "chevron.down")
+            HStack(alignment: .top) {
+                if selected.isEmpty {
+                    Text("Select…")
+                        .foregroundColor(theme.text.opacity(0.5))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    SelectedChipsView(
+                        options: config.options,
+                        selectedIds: selected,
+                        theme: theme,
+                        onRemove: { id in
+                            // Immediate removal — no Apply needed (per spec)
+                            var updated = selected
+                            updated.removeAll { $0 == id }
+                            viewModel.multiSelectBinding(for: config.id).wrappedValue = updated
+                        }
+                    )
+                }
+                Image(systemName: isPanelOpen ? "chevron.up" : "chevron.down")
                     .foregroundColor(theme.text.opacity(0.6))
+                    .padding(.top, 2)
             }
         }
-    }
-
-    private var currentLabelForMultiSelect: String {
-        let selected = viewModel.values[config.id]?.asMultiSelect ?? []
-        if selected.isEmpty { return placeholderText }
-        let labels = selected.compactMap { id in
-            config.options.first(where: { $0.id == id })?.label
-        }
-        if labels.count <= 2 {
-            return labels.joined(separator: ", ")
-        }
-        return "\(labels.count) selected"
+        .buttonStyle(.plain)
     }
 }

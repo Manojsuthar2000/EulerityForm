@@ -28,13 +28,13 @@ struct TextFieldView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Label with required asterisk
-            HStack(spacing: 2) {
-                Text(config.label).foregroundColor(theme.text)
-                if config.required {
-                    Text("*").foregroundColor(theme.error)
-                }
-            }
+            // Label with required asterisk inline (wraps correctly)
+            Text(RequiredLabel.build(
+                label: config.label,
+                required: config.required,
+                textColor: theme.text,
+                errorColor: theme.error
+            ))
             .font(.subheadline)
 
             // The actual input — branches on subtype

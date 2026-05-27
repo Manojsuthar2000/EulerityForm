@@ -12,13 +12,19 @@
       "order": 4,
       "type": "DROPDOWN",
       "label": "Ad Networks",
-      "allow_multiple": true,
+      "allow_multiple": false,
       "error_message": "Please select at least one network.",
       "required": true,
       "options": [
         { "id": "net_google", "label": "Google Search" },
         { "id": "net_meta", "label": "Meta Platforms" },
-        { "id": "net_tiktok", "label": "TikTok" }
+        { "id": "net_tiktok", "label": "TikTok" },
+        { "id": "net_google1", "label": "Google Search" },
+        { "id": "net_meta1", "label": "Meta Platforms" },
+        { "id": "net_tiktok1", "label": "TikTok" },
+        { "id": "net_google2", "label": "Google Search" },
+        { "id": "net_meta2", "label": "Meta Platforms" },
+        { "id": "net_tiktok2", "label": "TikTok" }
       ]
     },
     {

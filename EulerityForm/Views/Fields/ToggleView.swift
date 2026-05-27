@@ -17,12 +17,12 @@ struct ToggleFieldView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Toggle(isOn: viewModel.boolBinding(for: config.id)) {
-                HStack(spacing: 2) {
-                    Text(config.label).foregroundColor(theme.text)
-                    if config.required {
-                        Text("*").foregroundColor(theme.error)
-                    }
-                }
+                Text(RequiredLabel.build(
+                    label: config.label,
+                    required: config.required,
+                    textColor: theme.text,
+                    errorColor: theme.error
+                ))
                 .font(.subheadline)
             }
             .tint(theme.border) // Use border color as the toggle accent

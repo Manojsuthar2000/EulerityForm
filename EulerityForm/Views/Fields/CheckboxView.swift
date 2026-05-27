@@ -44,18 +44,12 @@ struct CheckboxFieldView: View {
                 .buttonStyle(.plain)
 
                 // The label — links inside the AttributedString handle their
-                // own taps natively (opens URL in Safari). We deliberately do
-                // NOT add .onTapGesture to the whole label: SwiftUI's gesture
-                // resolution would let the outer gesture eat link taps and
-                // break the rich text behavior. Users toggle the checkbox via
-                // the box; they tap links to open URLs. Clean separation.
+                // own taps natively (opens URL in Safari). Asterisk is part of
+                // the same AttributedString, so it wraps inline with the last
+                // word instead of floating to the side of an HStack.
                 Text(attributedLabel)
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
-
-                if config.required {
-                    Text("*").foregroundColor(theme.error)
-                }
             }
 
             if let err = errorMessage {
@@ -68,10 +62,12 @@ struct CheckboxFieldView: View {
     }
 
     private var attributedLabel: AttributedString {
-        RichTextLabel.build(
+        RequiredLabel.buildCheckboxLabel(
             label: config.label,
+            required: config.required,
             metadata: config.metadata,
-            baseColor: theme.text,
+            textColor: theme.text,
+            errorColor: theme.error,
             linkColor: linkColor
         )
     }
