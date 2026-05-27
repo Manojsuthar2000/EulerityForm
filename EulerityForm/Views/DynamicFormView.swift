@@ -17,59 +17,49 @@ struct DynamicFormView: View {
     /// registers itself with `.focused($focusedField, equals: config.id)`.
     /// The Done button in the keyboard accessory bar clears this to dismiss
     /// the keyboard.
-    ///
-    /// Lives at the form root (not per-field) so we share a single keyboard
-    /// accessory bar across all fields rather than declaring one per field.
     @FocusState private var focusedField: String?
 
+    /// Observes UIResponder keyboard notifications. We position the Done bar
+    /// manually using this height because SwiftUI's automatic keyboard
+    /// avoidance has been unpredictable on iOS 26 when combined with
+    /// ZStack + .ignoresSafeArea + .safeAreaInset — Save kept being lifted
+    /// above the keyboard despite multiple modifier combinations.
+    @StateObject private var keyboard = KeyboardObserver()
+
+    private var isKeyboardVisible: Bool { keyboard.height > 0 }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // Title
-                Text(viewModel.schema.formTitle)
-                    .font(.title2.bold())
-                    .foregroundColor(viewModel.schema.theme.text)
+        VStack(spacing: 0) {
+            // Fixed title at top
+            Text(viewModel.schema.formTitle)
+                .font(.title2.bold())
+                .foregroundColor(viewModel.schema.theme.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
 
-                // Fields — already sorted by `order` in FormSchema
-                ForEach(viewModel.schema.fields, id: \.id) { field in
-                    fieldView(for: field)
+            // Scrolling form fields
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    ForEach(viewModel.schema.fields, id: \.id) { field in
+                        fieldView(for: field)
+                    }
                 }
-
-                // Save button
-                Button(action: { viewModel.attemptSave() }) {
-                    Text("Save")
-                        .font(.headline)
-                        .foregroundColor(viewModel.schema.theme.background)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(viewModel.schema.theme.text)
-                        .cornerRadius(10)
-                }
-                .padding(.top, 8)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 4)
             }
-            .padding(20)
+            .scrollDismissesKeyboard(.interactively)
+
+            // Bottom bar — switches between Save (no keyboard) and Done (keyboard active)
+            bottomBar
         }
         .background(viewModel.schema.theme.background.ignoresSafeArea())
-        // Swipe down on the scroll view to dismiss the keyboard. Combined
-        // with the Done toolbar, this gives users two dismissal paths.
-        .scrollDismissesKeyboard(.interactively)
-        // Custom keyboard accessory bar.
-        //
-        // We deliberately don't use .toolbar(placement: .keyboard) because
-        // iOS 26+ wraps toolbar buttons in a Liquid Glass capsule that
-        // clips custom backgrounds (we'd see a chopped-up blue rectangle
-        // inside a glass circle). The opt-out API is unreliable across
-        // iOS 26 patch versions.
-        //
-        // Instead, we render a regular view at the bottom safe area when
-        // a field is focused. The keyboard pushes our bar up with it
-        // because the safe area shrinks as the keyboard appears, so the
-        // accessory sits exactly at keyboard top — no glass styling involved.
-        .safeAreaInset(edge: .bottom) {
-            if focusedField != nil {
-                keyboardAccessoryBar
-            }
-        }
+        // Critical: this prevents the whole VStack from being lifted by
+        // SwiftUI's automatic keyboard avoidance. Without it the entire
+        // form shifts up when the keyboard opens, which is exactly what
+        // we don't want.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onChange(of: viewModel.savedPayload) { payload in
             if payload != nil { showingSuccessAlert = true }
         }
@@ -80,12 +70,46 @@ struct DynamicFormView: View {
         }
     }
 
-    // MARK: - Keyboard accessory
+    // MARK: - Bottom bar
+    //
+    // One slot at the bottom of the screen. When the keyboard is visible, it
+    // shows the Done button positioned just above the keyboard. When the
+    // keyboard is hidden, it shows the Save button at the screen bottom.
+    //
+    // They share the same slot rather than overlapping or competing for
+    // space, which avoids the Save-on-top-of-Done issue.
 
-    /// Custom bar that sits above the keyboard when any text field is focused.
-    /// Uses safeAreaInset rather than .toolbar so we can fully control styling
-    /// without iOS 26's Liquid Glass treatment.
-    private var keyboardAccessoryBar: some View {
+    @ViewBuilder
+    private var bottomBar: some View {
+        if isKeyboardVisible {
+            doneBar
+                // Position above the keyboard. We subtract the bottom safe
+                // area inset because the keyboard frame already includes it,
+                // and our VStack already accounts for the safe area at the
+                // bottom — without this subtraction we'd get a double gap.
+                .padding(.bottom, keyboard.height - bottomSafeAreaInset)
+                .transition(.opacity)
+        } else {
+            saveButton
+                .transition(.opacity)
+        }
+    }
+
+    private var saveButton: some View {
+        Button(action: { viewModel.attemptSave() }) {
+            Text("Save")
+                .font(.headline)
+                .foregroundColor(viewModel.schema.theme.background)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(viewModel.schema.theme.text)
+                .cornerRadius(10)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+    }
+
+    private var doneBar: some View {
         HStack {
             Spacer()
             Button {
@@ -105,6 +129,20 @@ struct DynamicFormView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
+    }
+
+    /// Reads the bottom safe area inset from the active window. Needed because
+    /// UIResponder.keyboardFrameEndUserInfoKey gives the keyboard's frame in
+    /// screen coordinates, which includes the home-indicator inset that our
+    /// VStack already respects. We subtract it to avoid a double gap.
+    private var bottomSafeAreaInset: CGFloat {
+        UIApplication.shared
+            .connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }?
+            .safeAreaInsets
+            .bottom ?? 0
     }
 
     /// Exhaustive switch — the compiler enforces we handle every case.
