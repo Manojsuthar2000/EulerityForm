@@ -13,6 +13,11 @@ struct TextFieldView: View {
     let theme: Theme
     @ObservedObject var viewModel: FormViewModel
 
+    /// Bound to the form's @FocusState. Each text field registers its id
+    /// so the form-level keyboard toolbar's Done button can clear focus
+    /// from whichever field is currently active.
+    var focusedField: FocusState<String?>.Binding
+
     private var errorMessage: String? { viewModel.error(for: config.id) }
     private var isOverLimit: Bool {
         viewModel.isOverMaxLength(fieldId: config.id, maxLength: config.maxLength)
@@ -37,8 +42,11 @@ struct TextFieldView: View {
             ))
             .font(.subheadline)
 
-            // The actual input — branches on subtype
+            // The actual input — branches on subtype.
+            // .focused() is attached here at the wrapper, not inside each
+            // case, so all subtypes share the same focus registration.
             inputField
+                .focused(focusedField, equals: config.id)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 .background(theme.background)
