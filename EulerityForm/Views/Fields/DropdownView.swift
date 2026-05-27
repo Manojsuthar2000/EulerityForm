@@ -60,10 +60,13 @@ struct DropdownView: View {
                     theme: theme,
                     mode: panelMode
                 )
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .top)),
-                    removal: .opacity
-                ))
+                // Fade-only on both insertion and removal. The earlier
+                // .move(edge: .top) made the panel appear to slide down
+                // from above, which read as a flicker since the fields
+                // below were also reflowing to make room at the same time.
+                // Pure opacity keeps the focus on the new content appearing
+                // in place rather than animating from somewhere.
+                .transition(.opacity)
             }
 
             if let err = errorMessage {
