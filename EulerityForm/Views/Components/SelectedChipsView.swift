@@ -23,6 +23,10 @@ struct SelectedChipsView: View {
     let options: [DropdownOption]
     let selectedIds: [String]
     let theme: Theme
+    /// When true, the × buttons are visually present but tap-disabled.
+    /// Used when the dropdown panel is open — chips shouldn't be mutable
+    /// while the user has a draft selection in progress.
+    let removeDisabled: Bool
     let onRemove: (String) -> Void
 
     private let maxRows = 3
@@ -55,7 +59,12 @@ struct SelectedChipsView: View {
                         if item.isOverflow {
                             OverflowChip(count: plan.overflowCount, theme: theme)
                         } else {
-                            Chip(label: item.label, theme: theme, onRemove: { onRemove(item.id) })
+                            Chip(
+                                label: item.label,
+                                theme: theme,
+                                removeDisabled: removeDisabled,
+                                onRemove: { onRemove(item.id) }
+                            )
                         }
                     }
                     Spacer(minLength: 0)
@@ -186,6 +195,7 @@ struct SelectedChipsView: View {
 private struct Chip: View {
     let label: String
     let theme: Theme
+    let removeDisabled: Bool
     let onRemove: () -> Void
 
     var body: some View {
@@ -197,11 +207,13 @@ private struct Chip: View {
             Button(action: onRemove) {
                 Image(systemName: "xmark")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(theme.text.opacity(0.7))
+                    .foregroundColor(theme.text.opacity(removeDisabled ? 0.3 : 0.7))
                     .padding(2)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .disabled(removeDisabled)
+            .allowsHitTesting(!removeDisabled)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

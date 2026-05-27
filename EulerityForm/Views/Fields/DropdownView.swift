@@ -2,20 +2,19 @@
 //  DropdownView.swift
 //  EulerityForm
 //
-//  DROPDOWN renderer. Two modes:
+//  DROPDOWN renderer. Uses the unified DropdownPanel for both single
+//  and multi-select to keep the visual language consistent across the form.
 //
-//  - Single-select: uses iOS Menu — taps an option, menu dismisses,
-//    selection commits immediately. The simple case where Menu works fine.
+//  Closed states differ:
+//    - Single: shows the selected option's label (or "Select…" placeholder)
+//    - Multi:  shows chips with × buttons, max 3 rows, "+N" overflow
 //
-//  - Multi-select: custom UI. Closed state shows a chip area with each
-//    selected option as a removable chip (× clears that one immediately,
-//    no Apply needed). Open state shows a panel BELOW the field with
-//    checkbox rows; the panel uses its own draft state, with Cancel and
-//    Apply buttons. Apply commits to the view model. Cancel discards.
+//  Open state is always the same inline panel below the field, with rows
+//  styled by mode (radio for single, checkbox for multi) and an action bar
+//  in multi mode.
 //
-//  Empty-options edge case: rendered as a non-interactive placeholder.
-//  Validation still fails for required fields, so the user sees the
-//  problem on Save.
+//  Empty options array on a required field renders a non-interactive
+//  placeholder and fails validation on Save.
 //
 
 import SwiftUI
@@ -27,8 +26,8 @@ struct DropdownView: View {
 
     @State private var isPanelOpen = false
 
-    // Shown error: suppress while the panel is open so we're not yelling
-    // at the user while they're actively fixing the field.
+    // Suppress error display while the panel is open so we're not yelling
+    // at the user mid-fix.
     private var errorMessage: String? {
         guard !isPanelOpen else { return nil }
         return viewModel.error(for: config.id)
@@ -45,7 +44,6 @@ struct DropdownView: View {
             ))
             .font(.subheadline)
 
-            // Closed-state header (always visible)
             headerView
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -56,26 +54,59 @@ struct DropdownView: View {
                         .stroke(borderColor, lineWidth: 1)
                 )
 
-            // Multi-select panel — inline, pushes content below down
-            if isPanelOpen && config.allowMultiple && !config.options.isEmpty {
-                MultiSelectPanel(
+            if isPanelOpen && !config.options.isEmpty {
+                DropdownPanel(
                     options: config.options,
-                    initialSelection: viewModel.values[config.id]?.asMultiSelect ?? [],
                     theme: theme,
-                    onCancel: {
-                        withAnimation(.easeInOut(duration: 0.15)) { isPanelOpen = false }
-                    },
-                    onApply: { newSelection in
-                        viewModel.multiSelectBinding(for: config.id).wrappedValue = newSelection
-                        withAnimation(.easeInOut(duration: 0.15)) { isPanelOpen = false }
-                    }
+                    mode: panelMode
                 )
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .top)),
+                    removal: .opacity
+                ))
             }
 
             if let err = errorMessage {
                 Text(err).font(.caption).foregroundColor(theme.error)
             }
+        }
+    }
+
+    // MARK: - Panel mode wiring
+
+    /// Builds the appropriate Mode for the panel based on field config.
+    /// Closes the panel after commit in both modes (with animated batching
+    /// to prevent the flicker where new selection appears before the panel
+    /// transition completes).
+    private var panelMode: DropdownPanel.Mode {
+        if config.allowMultiple {
+            return .multi(
+                initial: viewModel.values[config.id]?.asMultiSelect ?? [],
+                onCancel: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isPanelOpen = false
+                    }
+                },
+                onApply: { newSelection in
+                    // Both state changes in one animation transaction.
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.multiSelectBinding(for: config.id).wrappedValue = newSelection
+                        isPanelOpen = false
+                    }
+                }
+            )
+        } else {
+            return .single(
+                initial: viewModel.values[config.id]?.asSingleSelect,
+                onSelect: { id in
+                    // Single-select commits immediately and closes the panel.
+                    // Same batched-animation pattern as multi for consistency.
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.singleSelectBinding(for: config.id).wrappedValue = id
+                        isPanelOpen = false
+                    }
+                }
+            )
         }
     }
 
@@ -103,30 +134,23 @@ struct DropdownView: View {
         }
     }
 
-    // MARK: - Single select (Menu — simple, closes on tap)
+    // MARK: - Single select header
 
     private var singleSelectHeader: some View {
-        Menu {
-            ForEach(config.options) { option in
-                Button {
-                    viewModel.singleSelectBinding(for: config.id).wrappedValue = option.id
-                } label: {
-                    if viewModel.values[config.id]?.asSingleSelect == option.id {
-                        Label(option.label, systemImage: "checkmark")
-                    } else {
-                        Text(option.label)
-                    }
-                }
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isPanelOpen.toggle()
             }
         } label: {
             HStack {
                 Text(currentLabelForSingleSelect)
                     .foregroundColor(isSinglePlaceholder ? theme.text.opacity(0.5) : theme.text)
                 Spacer()
-                Image(systemName: "chevron.down")
+                Image(systemName: isPanelOpen ? "chevron.up" : "chevron.down")
                     .foregroundColor(theme.text.opacity(0.6))
             }
         }
+        .buttonStyle(.plain)
     }
 
     private var isSinglePlaceholder: Bool {
@@ -141,15 +165,12 @@ struct DropdownView: View {
         return "Select…"
     }
 
-    // MARK: - Multi select header (chips + chevron, taps open the panel)
+    // MARK: - Multi select header (chips + chevron)
 
     private var multiSelectHeader: some View {
-        // The whole header is one tap target — taps anywhere except a chip's
-        // × button toggle the panel. Chip × is handled by SelectedChipsView
-        // via its own Button, which absorbs taps.
         let selected = viewModel.values[config.id]?.asMultiSelect ?? []
         return Button {
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isPanelOpen.toggle()
             }
         } label: {
@@ -163,8 +184,10 @@ struct DropdownView: View {
                         options: config.options,
                         selectedIds: selected,
                         theme: theme,
+                        removeDisabled: isPanelOpen,
                         onRemove: { id in
-                            // Immediate removal — no Apply needed (per spec)
+                            // Immediate removal — no Apply needed (per spec).
+                            // Disabled when panel open (see removeDisabled).
                             var updated = selected
                             updated.removeAll { $0 == id }
                             viewModel.multiSelectBinding(for: config.id).wrappedValue = updated
