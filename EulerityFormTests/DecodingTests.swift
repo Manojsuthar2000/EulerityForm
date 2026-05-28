@@ -17,6 +17,14 @@
 import XCTest
 @testable import EulerityForm
 
+// This project builds with `-default-isolation MainActor` (every type is
+// implicitly @MainActor unless marked otherwise). That makes FormField's
+// synthesized Decodable conformance MainActor-isolated, so it can only be
+// invoked from a MainActor context. Marking the test case @MainActor puts
+// every test method and helper in that same context. Without this, Swift 6
+// rejects the decode calls: "Main actor-isolated conformance ... cannot be
+// used in nonisolated context."
+@MainActor
 final class DecodingTests: XCTestCase {
 
     // MARK: - Helpers
