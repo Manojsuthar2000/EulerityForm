@@ -45,6 +45,8 @@
       "subtype": "URI",
       "label": "Destination URL",
       "placeholder": "https://example.com/landing",
+      "regex": "^https?://[\\w.-]+(\\.[\\w.-]+)+([/?#].*)?$",
+      "error_message": "Enter a valid URL starting with http:// or https://",
       "required": true
     },
     {
@@ -63,15 +65,32 @@
       "type": "DROPDOWN",
       "label": "Primary Objective",
       "allow_multiple": false,
-      "default_values": ["obj_traffic"],
+      "default_values": [
+        "obj_traffic"
+      ],
       "error_message": "Please choose an objective.",
       "required": true,
       "options": [
-        { "id": "obj_awareness", "label": "Brand Awareness" },
-        { "id": "obj_traffic", "label": "Website Traffic" },
-        { "id": "obj_leads", "label": "Lead Generation" },
-        { "id": "obj_sales", "label": "Sales & Conversions" },
-        { "id": "obj_app", "label": "App Installs" }
+        {
+          "id": "obj_awareness",
+          "label": "Brand Awareness"
+        },
+        {
+          "id": "obj_traffic",
+          "label": "Website Traffic"
+        },
+        {
+          "id": "obj_leads",
+          "label": "Lead Generation"
+        },
+        {
+          "id": "obj_sales",
+          "label": "Sales & Conversions"
+        },
+        {
+          "id": "obj_app",
+          "label": "App Installs"
+        }
       ]
     },
     {
@@ -80,18 +99,45 @@
       "type": "DROPDOWN",
       "label": "Ad Networks",
       "allow_multiple": true,
-      "default_values": ["net_meta", "net_google"],
+      "default_values": [
+        "net_meta",
+        "net_google"
+      ],
       "error_message": "Select at least one network to launch.",
       "required": true,
       "options": [
-        { "id": "net_google", "label": "Google Search" },
-        { "id": "net_meta", "label": "Meta Platforms (Facebook & Instagram)" },
-        { "id": "net_tiktok", "label": "TikTok" },
-        { "id": "net_youtube", "label": "YouTube" },
-        { "id": "net_linkedin", "label": "LinkedIn" },
-        { "id": "net_pinterest", "label": "Pinterest" },
-        { "id": "net_snapchat", "label": "Snapchat" },
-        { "id": "net_reddit", "label": "Reddit" }
+        {
+          "id": "net_google",
+          "label": "Google Search"
+        },
+        {
+          "id": "net_meta",
+          "label": "Meta Platforms (Facebook & Instagram)"
+        },
+        {
+          "id": "net_tiktok",
+          "label": "TikTok"
+        },
+        {
+          "id": "net_youtube",
+          "label": "YouTube"
+        },
+        {
+          "id": "net_linkedin",
+          "label": "LinkedIn"
+        },
+        {
+          "id": "net_pinterest",
+          "label": "Pinterest"
+        },
+        {
+          "id": "net_snapchat",
+          "label": "Snapchat"
+        },
+        {
+          "id": "net_reddit",
+          "label": "Reddit"
+        }
       ]
     },
     {

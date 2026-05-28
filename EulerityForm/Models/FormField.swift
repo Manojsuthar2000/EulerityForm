@@ -54,21 +54,30 @@ extension FormField: Decodable {
         let typeContainer = try decoder.container(keyedBy: TypeKey.self)
         let typeString = try typeContainer.decode(String.self, forKey: .type)
 
-        // The single-value-container trick: each subtype decodes from
-        // the same JSON object the parent is looking at. This avoids
-        // duplicating decode logic here.
+        // Each subtype decodes from the same JSON object the parent is
+        // looking at (each has its own init(from:) reading only its keys).
+        //
+        // If a known-type field is malformed (e.g. missing required `id`),
+        // the typed decode throws. We catch that and fall back to .unknown
+        // rather than letting the error propagate. This keeps FormField
+        // decoding total (never throws as long as `type` is a string), so
+        // an array of fields decodes cleanly and FormSchema simply filters
+        // out the .unknown entries. No fragile container-skipping needed.
         switch typeString {
         case "TEXT":
-            self = .text(try TextFieldConfig(from: decoder))
+            if let c = try? TextFieldConfig(from: decoder) { self = .text(c) }
+            else { self = .unknown(rawType: typeString) }
         case "DROPDOWN":
-            self = .dropdown(try DropdownFieldConfig(from: decoder))
+            if let c = try? DropdownFieldConfig(from: decoder) { self = .dropdown(c) }
+            else { self = .unknown(rawType: typeString) }
         case "TOGGLE":
-            self = .toggle(try ToggleFieldConfig(from: decoder))
+            if let c = try? ToggleFieldConfig(from: decoder) { self = .toggle(c) }
+            else { self = .unknown(rawType: typeString) }
         case "CHECKBOX":
-            self = .checkbox(try CheckboxFieldConfig(from: decoder))
+            if let c = try? CheckboxFieldConfig(from: decoder) { self = .checkbox(c) }
+            else { self = .unknown(rawType: typeString) }
         default:
-            // Defensive: anything we don't recognize becomes .unknown.
-            // The schema decoder filters these out before they reach the UI.
+            // Unrecognized type — also becomes .unknown, filtered by schema.
             self = .unknown(rawType: typeString)
         }
     }

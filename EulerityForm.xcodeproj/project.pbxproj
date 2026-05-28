@@ -6,11 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		55237D7D2FC8AFA100D5C998 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 553ED05A2FC5B85F0071A6BE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 553ED0612FC5B85F0071A6BE;
+			remoteInfo = EulerityForm;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		55237D792FC8AFA100D5C998 /* EulerityFormTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EulerityFormTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		553ED0622FC5B85F0071A6BE /* EulerityForm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EulerityForm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		55237D7A2FC8AFA100D5C998 /* EulerityFormTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EulerityFormTests;
+			sourceTree = "<group>";
+		};
 		553ED0642FC5B85F0071A6BE /* EulerityForm */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = EulerityForm;
@@ -19,6 +35,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		55237D762FC8AFA100D5C998 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		553ED05F2FC5B85F0071A6BE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				553ED0642FC5B85F0071A6BE /* EulerityForm */,
+				55237D7A2FC8AFA100D5C998 /* EulerityFormTests */,
 				553ED0632FC5B85F0071A6BE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				553ED0622FC5B85F0071A6BE /* EulerityForm.app */,
+				55237D792FC8AFA100D5C998 /* EulerityFormTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +73,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		55237D782FC8AFA100D5C998 /* EulerityFormTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55237D7F2FC8AFA100D5C998 /* Build configuration list for PBXNativeTarget "EulerityFormTests" */;
+			buildPhases = (
+				55237D752FC8AFA100D5C998 /* Sources */,
+				55237D762FC8AFA100D5C998 /* Frameworks */,
+				55237D772FC8AFA100D5C998 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				55237D7E2FC8AFA100D5C998 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				55237D7A2FC8AFA100D5C998 /* EulerityFormTests */,
+			);
+			name = EulerityFormTests;
+			packageProductDependencies = (
+			);
+			productName = EulerityFormTests;
+			productReference = 55237D792FC8AFA100D5C998 /* EulerityFormTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		553ED0612FC5B85F0071A6BE /* EulerityForm */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 553ED06D2FC5B8600071A6BE /* Build configuration list for PBXNativeTarget "EulerityForm" */;
@@ -80,6 +128,10 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
+					55237D782FC8AFA100D5C998 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 553ED0612FC5B85F0071A6BE;
+					};
 					553ED0612FC5B85F0071A6BE = {
 						CreatedOnToolsVersion = 26.4;
 					};
@@ -100,11 +152,19 @@
 			projectRoot = "";
 			targets = (
 				553ED0612FC5B85F0071A6BE /* EulerityForm */,
+				55237D782FC8AFA100D5C998 /* EulerityFormTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		55237D772FC8AFA100D5C998 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		553ED0602FC5B85F0071A6BE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +175,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		55237D752FC8AFA100D5C998 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		553ED05E2FC5B85F0071A6BE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +191,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		55237D7E2FC8AFA100D5C998 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 553ED0612FC5B85F0071A6BE /* EulerityForm */;
+			targetProxy = 55237D7D2FC8AFA100D5C998 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		55237D802FC8AFA100D5C998 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4C3498HKF9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manojsuthar2000.EulerityFormTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EulerityForm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EulerityForm";
+			};
+			name = Debug;
+		};
+		55237D812FC8AFA100D5C998 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4C3498HKF9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manojsuthar2000.EulerityFormTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EulerityForm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EulerityForm";
+			};
+			name = Release;
+		};
 		553ED06B2FC5B8600071A6BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -313,6 +430,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		55237D7F2FC8AFA100D5C998 /* Build configuration list for PBXNativeTarget "EulerityFormTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55237D802FC8AFA100D5C998 /* Debug */,
+				55237D812FC8AFA100D5C998 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		553ED05D2FC5B85F0071A6BE /* Build configuration list for PBXProject "EulerityForm" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

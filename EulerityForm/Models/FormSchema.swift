@@ -31,27 +31,19 @@ struct FormSchema: Decodable {
         theme = (try? c.decode(Theme.self, forKey: .theme)) ?? Theme.fallback
         formTitle = (try? c.decode(String.self, forKey: .formTitle)) ?? "Form"
 
-        // Decode each field independently. If a single field fails to decode
-        // (corrupt JSON, unexpected shape), we drop it and keep going rather
-        // than failing the whole form.
-        var fieldsContainer = try c.nestedUnkeyedContainer(forKey: .fields)
-        var decoded: [FormField] = []
-        while !fieldsContainer.isAtEnd {
-            if let field = try? fieldsContainer.decode(FormField.self) {
-                // Filter unknowns at the schema level so the UI never sees them
-                if case .unknown = field {
-                    // Skip silently. We could log here if we wanted observability.
-                    continue
-                }
-                decoded.append(field)
-            } else {
-                // Skip past the bad element so we don't infinite-loop
-                _ = try? fieldsContainer.decode(AnyDecodable.self)
-            }
+        // FormField decoding is total: it never throws as long as each
+        // element has a string `type`. Malformed known-type fields and
+        // unrecognized types both become .unknown. So we decode the whole
+        // array in one shot, then filter out .unknown before it reaches the
+        // UI. A single bad field is dropped; the rest of the form survives.
+        let allFields = (try? c.decode([FormField].self, forKey: .fields)) ?? []
+        let usableFields = allFields.filter { field in
+            if case .unknown = field { return false }
+            return true
         }
 
         // Sort by `order` — never rely on JSON array index.
-        fields = decoded.sorted { $0.order < $1.order }
+        fields = usableFields.sorted { $0.order < $1.order }
     }
 
     /// Convenience for loading from the app bundle.
@@ -74,9 +66,6 @@ enum FormSchemaError: Error, LocalizedError {
         }
     }
 }
-
-/// Sink type for skipping past unparseable JSON values without infinite-looping.
-private struct AnyDecodable: Decodable {}
 
 // MARK: - Fallback
 
