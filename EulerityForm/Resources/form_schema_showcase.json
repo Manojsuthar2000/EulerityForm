@@ -1,0 +1,135 @@
+{
+  "theme": {
+    "background_color": "#0F172A",
+    "text_color": "#F1F5F9",
+    "border_color": "#334155",
+    "error_color": "#FB7185"
+  },
+  "form_title": "Create New Campaign",
+  "fields": [
+    {
+      "id": "campaign_name",
+      "order": 1,
+      "type": "TEXT",
+      "subtype": "PLAIN",
+      "label": "Campaign Name",
+      "placeholder": "e.g., Summer Sale 2026",
+      "max_length": 40,
+      "error_message": "Campaign name is required.",
+      "required": true
+    },
+    {
+      "id": "campaign_description",
+      "order": 2,
+      "type": "TEXT",
+      "subtype": "MULTILINE",
+      "label": "Description",
+      "placeholder": "Describe your campaign goals and target audience…",
+      "max_length": 200,
+      "required": false
+    },
+    {
+      "id": "daily_budget",
+      "order": 3,
+      "type": "TEXT",
+      "subtype": "NUMBER",
+      "label": "Daily Budget ($)",
+      "placeholder": "0.00",
+      "error_message": "Please enter a daily budget.",
+      "required": true
+    },
+    {
+      "id": "destination_url",
+      "order": 4,
+      "type": "TEXT",
+      "subtype": "URI",
+      "label": "Destination URL",
+      "placeholder": "https://example.com/landing",
+      "required": true
+    },
+    {
+      "id": "account_password",
+      "order": 5,
+      "type": "TEXT",
+      "subtype": "SECURE",
+      "label": "Account Password",
+      "placeholder": "Enter your password",
+      "error_message": "Password is required to authorize spending.",
+      "required": true
+    },
+    {
+      "id": "primary_objective",
+      "order": 6,
+      "type": "DROPDOWN",
+      "label": "Primary Objective",
+      "allow_multiple": false,
+      "default_values": ["obj_traffic"],
+      "error_message": "Please choose an objective.",
+      "required": true,
+      "options": [
+        { "id": "obj_awareness", "label": "Brand Awareness" },
+        { "id": "obj_traffic", "label": "Website Traffic" },
+        { "id": "obj_leads", "label": "Lead Generation" },
+        { "id": "obj_sales", "label": "Sales & Conversions" },
+        { "id": "obj_app", "label": "App Installs" }
+      ]
+    },
+    {
+      "id": "ad_networks",
+      "order": 7,
+      "type": "DROPDOWN",
+      "label": "Ad Networks",
+      "allow_multiple": true,
+      "default_values": ["net_meta", "net_google"],
+      "error_message": "Select at least one network to launch.",
+      "required": true,
+      "options": [
+        { "id": "net_google", "label": "Google Search" },
+        { "id": "net_meta", "label": "Meta Platforms (Facebook & Instagram)" },
+        { "id": "net_tiktok", "label": "TikTok" },
+        { "id": "net_youtube", "label": "YouTube" },
+        { "id": "net_linkedin", "label": "LinkedIn" },
+        { "id": "net_pinterest", "label": "Pinterest" },
+        { "id": "net_snapchat", "label": "Snapchat" },
+        { "id": "net_reddit", "label": "Reddit" }
+      ]
+    },
+    {
+      "id": "enable_ai_bidding",
+      "order": 8,
+      "type": "TOGGLE",
+      "label": "Enable AI Bidding Optimization",
+      "default_value": true,
+      "required": false
+    },
+    {
+      "id": "enable_auto_pause",
+      "order": 9,
+      "type": "TOGGLE",
+      "label": "Auto-pause underperforming ads",
+      "default_value": false,
+      "required": false
+    },
+    {
+      "id": "accept_legal",
+      "order": 10,
+      "type": "CHECKBOX",
+      "label": "I have read and agree to the Terms of Service and Privacy Policy.",
+      "error_message": "You must accept the legal terms to launch.",
+      "required": true,
+      "metadata": {
+        "Terms of Service": "https://example.com/terms",
+        "Privacy Policy": "https://example.com/privacy"
+      },
+      "clickable_text_color": "#38BDF8"
+    },
+    {
+      "id": "subscribe_newsletter",
+      "order": 11,
+      "type": "CHECKBOX",
+      "label": "Send me product updates and marketing tips.",
+      "required": false,
+      "default_value": false
+    }
+  ]
+}
